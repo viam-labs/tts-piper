@@ -25,7 +25,12 @@ pillow==10.2.0
 protobuf==4.25.3
     # via googleapis-common-protos
     # via viam-sdk
+pyaudio==0.2.14
+    # via tts-piper
+speech-service-api @ git+https://github.com/viam-labs/speech-service-api.git@cd37fc3316afcda58d1b4b590812a1005f54efdb
+    # via tts-piper
 typing-extensions==4.10.0
     # via viam-sdk
-viam-sdk==0.15.0
+viam-sdk==0.16.1
+    # via speech-service-api
     # via tts-piper
