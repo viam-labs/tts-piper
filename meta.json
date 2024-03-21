@@ -1,0 +1,13 @@
+{
+  "module_id": "viam-labs:tts-piper",
+  "visibility": "public",
+  "url": "https://github.com/viam-labs/tts-piper",
+  "description": "A modular service that provides text-to-speech (TTS) capabilities for machines running on the Viam platform.",
+  "models": [
+    {
+      "api": "viam-labs:service:speech",
+      "model": "viam-labs:speech:tts-piper"
+    }
+  ],
+  "entrypoint": "run.sh"
+}
