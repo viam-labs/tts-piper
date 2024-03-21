@@ -5,7 +5,7 @@ bundle:
 	tar -czf module.tar.gz *.sh dist
 
 upload:
-	viam module upload --version $(version) --platform any module.tar.gz
+	viam module upload --version $(version) --platform linux/any module.tar.gz
 
 clean:
 	rm module.tar.gz && rm -rf dist/

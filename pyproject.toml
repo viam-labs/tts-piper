@@ -8,7 +8,7 @@ authors = [
 dependencies = [
     "viam-sdk>=0.15.0",
     "speech-service-api @ git+https://github.com/viam-labs/speech-service-api.git@v0.4.0",
-    "piper-tts>=1.2.0; platform_system == 'Linux'",
+    "piper-tts @ git+https://github.com/rhasspy/piper@e5cb84c#subdirectory=src/python_run ; platform_system == 'Linux'",
     "pyaudio>=0.2.14",
 ]
 readme = "README.md"

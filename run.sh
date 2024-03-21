@@ -21,7 +21,7 @@ if command -v apt-get; then
     fi
     $SUDO apt-get install -qqy python3-venv
   fi
-  $SUDO apt-get install -qqy portaudio19-dev pyton3-all-dev python3-pyaudio
+  $SUDO apt-get install -qqy portaudio19-dev python3-all-dev python3-pyaudio
 else
   echo "Skipping tool installation because your platform is missing apt-get"
   echo "If you see failures below, install the equivalent of python3-venv for your system"

@@ -27,6 +27,9 @@ async def main():
     LOGGER.info("Getting bytes for speech...")
     result = await tts.to_speech(text="Hello from the Viam machine!")
     with wave.open("speech.wav", "wb") as wf:
+        wf.setframerate(22050)
+        wf.setsampwidth(2)
+        wf.setnchannels(1)
         wf.writeframes(result)
 
     LOGGER.info("Saved audio to speech.wav file")

@@ -92,12 +92,28 @@ class TtsPiper(SpeechService, Reconfigurable):
         return wav_io.getvalue()
 
     def _synthesis(self, text: str) -> Tuple[BytesIO, wave.Wave_write]:
-        with BytesIO() as wav_io:
-            with wave.open(wav_io, "wb") as wav_file:
-                self.voice.synthesize(
-                    text,
-                    wav_file,
-                    speaker_id=0,
-                    sentence_silence=0.0,
-                )
-            return wav_io, wav_file
+        wav_io = BytesIO()
+        wav_file = wave.open(wav_io, "wb")
+
+        self.voice.synthesize(
+            text,
+            wav_file,
+            speaker_id=0,
+            sentence_silence=0.0,
+        )
+        return wav_io, wav_file
+
+    async def listen(self) -> str:
+        raise NotImplementedError()
+
+    async def listen_trigger(self, type: str) -> Sequence[str]:
+        raise NotImplementedError()
+
+    async def completion(self, text: str, blocking: bool) -> str:
+        raise NotImplementedError()
+
+    async def to_text(self, speech: bytes, format: str) -> str:
+        raise NotImplementedError()
+
+    async def get_commands(self, number: int) -> Sequence[str]:
+        raise NotImplementedError()
