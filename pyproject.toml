@@ -10,6 +10,8 @@ dependencies = [
     "speech-service-api @ git+https://github.com/viam-labs/speech-service-api.git@v0.4.0",
     "piper-tts @ git+https://github.com/rhasspy/piper@e5cb84c#subdirectory=src/python_run ; platform_system == 'Linux'",
     "pyaudio>=0.2.14",
+    "piper-phonemize @ git+https://github.com/jmfrank63/piper-phonemize@fix-python-install ; platform_system == 'Darwin'",
+    "piper-tts @ git+https://github.com/jmfrank63/piper@fix-python-install#subdirectory=src/python_run ; platform_system == 'Darwin'",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

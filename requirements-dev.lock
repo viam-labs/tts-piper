@@ -8,6 +8,10 @@
 #   with-sources: false
 
 -e file:.
+coloredlogs==15.0.1
+    # via onnxruntime
+flatbuffers==24.3.7
+    # via onnxruntime
 googleapis-common-protos==1.63.0
     # via viam-sdk
 grpclib==0.4.6
@@ -16,19 +20,37 @@ h2==4.1.0
     # via grpclib
 hpack==4.0.0
     # via h2
+humanfriendly==10.0
+    # via coloredlogs
 hyperframe==6.0.1
     # via h2
+mpmath==1.3.0
+    # via sympy
 multidict==6.0.5
     # via grpclib
+numpy==1.26.4
+    # via onnxruntime
+onnxruntime==1.17.1
+    # via piper-tts
+packaging==24.0
+    # via onnxruntime
 pillow==10.2.0
     # via viam-sdk
+piper-phonemize @ git+https://github.com/jmfrank63/piper-phonemize@71d7ede99e4ae1d5164fb8a0161cd522aa56c2ee
+    # via piper-tts
+    # via tts-piper
+piper-tts @ git+https://github.com/jmfrank63/piper@d0ef6402cd8f6d8cd046230e8d584e4850a07f5c#subdirectory=src/python_run
+    # via tts-piper
 protobuf==4.25.3
     # via googleapis-common-protos
+    # via onnxruntime
     # via viam-sdk
 pyaudio==0.2.14
     # via tts-piper
 speech-service-api @ git+https://github.com/viam-labs/speech-service-api.git@cd37fc3316afcda58d1b4b590812a1005f54efdb
     # via tts-piper
+sympy==1.12
+    # via onnxruntime
 typing-extensions==4.10.0
     # via viam-sdk
 viam-sdk==0.15.0
