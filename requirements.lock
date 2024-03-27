@@ -36,10 +36,9 @@ packaging==24.0
     # via onnxruntime
 pillow==10.2.0
     # via viam-sdk
-piper-phonemize @ git+https://github.com/jmfrank63/piper-phonemize@71d7ede99e4ae1d5164fb8a0161cd522aa56c2ee
+piper-phonemize-cross==1.2.1
     # via piper-tts
-    # via tts-piper
-piper-tts @ git+https://github.com/jmfrank63/piper@d0ef6402cd8f6d8cd046230e8d584e4850a07f5c#subdirectory=src/python_run
+piper-tts @ git+https://github.com/hipsterbrown/piper@4ca58d0ce0c9b0771f0ca59a491dd2c7ba67d370#subdirectory=src/python_run
     # via tts-piper
 protobuf==4.25.3
     # via googleapis-common-protos
