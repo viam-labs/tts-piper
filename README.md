@@ -2,7 +2,7 @@
 
 A modular service that provides text-to-speech (TTS) capabilities for machines running on the Viam platform.
 
-This module implements the `say` and `to_text` commands of the [speech service API (`viam-labs:service:speech`)](https://docs.viam.com/registry/advanced/generic/). Follow the documentation below to learn about how to use it with the Viam SDKs.
+This module implements the `say` and `to_text` commands of the [speech service API (`viam-labs:service:speech`)](https://docs.viam.com/registry/advanced/generic/). Follow the documentation there to learn about how to use it with the Viam SDKs.
 
 ## Usage
 
