@@ -7,7 +7,7 @@ from typing import ClassVar, Tuple
 from typing_extensions import Self
 
 from viam.logging import getLogger
-from viam.module.module import Reconfigurable
+from viam.module.types import Reconfigurable
 from viam.proto.common import ResourceName
 from viam.resource.base import ResourceBase
 from viam.proto.app.robot import ComponentConfig

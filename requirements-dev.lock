@@ -6,15 +6,19 @@
 #   features: []
 #   all-features: false
 #   with-sources: false
+#   generate-hashes: false
+#   universal: false
 
 -e file:.
 coloredlogs==15.0.1
     # via onnxruntime
+dnspython==2.7.0
+    # via pymongo
 flatbuffers==24.3.7
     # via onnxruntime
-googleapis-common-protos==1.63.0
+googleapis-common-protos==1.67.0
     # via viam-sdk
-grpclib==0.4.6
+grpclib==0.4.7
     # via viam-sdk
 h2==4.1.0
     # via grpclib
@@ -34,24 +38,24 @@ onnxruntime==1.17.1
     # via piper-tts
 packaging==24.0
     # via onnxruntime
-pillow==10.2.0
-    # via viam-sdk
 piper-phonemize-cross==1.2.1
     # via piper-tts
 piper-tts @ git+https://github.com/hipsterbrown/piper@4ca58d0ce0c9b0771f0ca59a491dd2c7ba67d370#subdirectory=src/python_run
     # via tts-piper
-protobuf==4.25.3
+protobuf==5.29.1
     # via googleapis-common-protos
     # via onnxruntime
     # via viam-sdk
 pyaudio==0.2.14
     # via tts-piper
-speech-service-api @ git+https://github.com/viam-labs/speech-service-api.git@cd37fc3316afcda58d1b4b590812a1005f54efdb
+pymongo==4.11.1
+    # via viam-sdk
+speech-service-api @ git+https://github.com/viam-labs/speech-service-api.git@baf9ffe8703d02f4c093db12e5b5de68fe30a720
     # via tts-piper
 sympy==1.12
     # via onnxruntime
-typing-extensions==4.10.0
+typing-extensions==4.12.2
     # via viam-sdk
-viam-sdk==0.15.0
+viam-sdk==0.41.0
     # via speech-service-api
     # via tts-piper

@@ -6,8 +6,8 @@ authors = [
     { name = "HipsterBrown", email = "headhipster@hipsterbrown.com" }
 ]
 dependencies = [
-    "viam-sdk>=0.15.0",
-    "speech-service-api @ git+https://github.com/viam-labs/speech-service-api.git@v0.4.0",
+    "viam-sdk>=0.40.0",
+    "speech-service-api @ git+https://github.com/viam-labs/speech-service-api.git@v0.5.2",
     "piper-tts @ git+https://github.com/hipsterbrown/piper@master#subdirectory=src/python_run",
     "pyaudio>=0.2.14"
 ]

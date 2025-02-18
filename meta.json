@@ -6,7 +6,9 @@
   "models": [
     {
       "api": "viam-labs:service:speech",
-      "model": "viam-labs:speech:tts-piper"
+      "model": "viam-labs:speech:tts-piper",
+      "markdown_link": "README.md#config",
+      "short_description": "Provides text-to-speech(TTS) capabilities through a local model"
     }
   ],
   "entrypoint": "run.sh"
