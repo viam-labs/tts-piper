@@ -25,6 +25,8 @@ brew install portaudio
 
 Before configuring your speech service, you must also [create a machine](https://docs.viam.com/fleet/machines/#add-a-new-machine).
 
+## Config
+
 ### Viam Service Configuration
 
 Navigate to the **Config** tab of your machine's page in [the Viam app](https://app.viam.com/).

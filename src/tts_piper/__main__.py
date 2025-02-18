@@ -8,7 +8,7 @@ from . import TtsPiper
 
 async def main():
     module = Module.from_args()
-    module.add_model_from_registry(SpeechService.SUBTYPE, TtsPiper.MODEL)
+    module.add_model_from_registry(SpeechService.API, TtsPiper.MODEL)
     await module.start()
 
 
