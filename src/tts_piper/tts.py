@@ -22,6 +22,16 @@ import pyaudio
 LOGGER = getLogger(__name__)
 
 
+def _is_cuda_available() -> bool:
+    """Check if CUDA is available for use with ONNX Runtime."""
+    try:
+        import onnxruntime as ort
+        providers = ort.get_available_providers()
+        return 'CUDAExecutionProvider' in providers
+    except ImportError:
+        return False
+
+
 class TtsPiper(SpeechService, EasyResource):
     MODEL: ClassVar[Model] = Model(ModelFamily("viam-labs", "speech"), "tts-piper")
 
@@ -57,7 +67,14 @@ class TtsPiper(SpeechService, EasyResource):
         model_config_path = download_dir / f"{self.voice_model_name}.onnx.json"
         download_voice(self.voice_model_name, download_dir)
 
-        self.voice = PiperVoice.load(model_path, config_path=model_config_path)
+        # Use CUDA if available
+        use_cuda = _is_cuda_available()
+        if use_cuda:
+            LOGGER.debug("CUDA detected, enabling GPU acceleration for Piper TTS")
+        else:
+            LOGGER.debug("CUDA not available, using CPU for Piper TTS")
+        
+        self.voice = PiperVoice.load(model_path, config_path=model_config_path, use_cuda=use_cuda)
 
     async def close(self):
         LOGGER.info(f"{self.name} is closed.")

@@ -38,6 +38,14 @@ fi
 
 source $VIRTUAL_ENV/bin/activate
 
+# Check if CUDA is available and install appropriate ONNX Runtime
+if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi >/dev/null 2>&1; then
+  echo "CUDA detected, installing onnxruntime-gpu"
+  uv pip install onnxruntime-gpu
+else
+  echo "CUDA not detected, using default onnxruntime (CPU)"
+fi
+
 if ! uv pip install ./dist/tts_piper*.whl; then
   echo "unable to sync requirements to venv"
   exit 1
