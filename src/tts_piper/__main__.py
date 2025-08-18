@@ -1,15 +1,8 @@
 import asyncio
 
 from viam.module.module import Module
-
-from speech_service_api import SpeechService
-from . import TtsPiper
+from .tts import TtsPiper
 
 
-async def main():
-    module = Module.from_args()
-    module.add_model_from_registry(SpeechService.API, TtsPiper.MODEL)
-    await module.start()
-
-
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(Module.run_from_registry())

@@ -11,5 +11,16 @@
       "short_description": "Provides text-to-speech(TTS) capabilities through a local model"
     }
   ],
-  "entrypoint": "run.sh"
+  "entrypoint": "run.sh",
+  "first_run": "setup.sh",
+  "build": {
+    "setup": "",
+    "build": "./build.sh",
+    "path": "module.tar.gz",
+    "arch": [
+      "linux/amd64",
+      "linux/arm64",
+      "darwin/arm64"
+    ]
+  }
 }

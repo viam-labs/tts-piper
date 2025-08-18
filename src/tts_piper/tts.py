@@ -7,22 +7,22 @@ from typing import ClassVar, Tuple
 from typing_extensions import Self
 
 from viam.logging import getLogger
-from viam.module.types import Reconfigurable
 from viam.proto.common import ResourceName
 from viam.resource.base import ResourceBase
+from viam.resource.easy_resource import EasyResource
 from viam.proto.app.robot import ComponentConfig
 from viam.resource.types import Model, ModelFamily
 from viam.utils import struct_to_dict
 
 from speech_service_api import SpeechService
 from piper import PiperVoice
-from piper.download import ensure_voice_exists, find_voice, get_voices
+from piper.download_voices import download_voice
 import pyaudio
 
 LOGGER = getLogger(__name__)
 
 
-class TtsPiper(SpeechService, Reconfigurable):
+class TtsPiper(SpeechService, EasyResource):
     MODEL: ClassVar[Model] = Model(ModelFamily("viam-labs", "speech"), "tts-piper")
 
     voice_model_name: str = "en_US-amy-medium"
@@ -36,13 +36,15 @@ class TtsPiper(SpeechService, Reconfigurable):
     def new(
         cls, config: ComponentConfig, dependencies: Mapping[ResourceName, ResourceBase]
     ) -> Self:
-        stt = cls(config.name)
-        stt.reconfigure(config, dependencies)
-        return stt
+        tts = cls(config.name)
+        tts.reconfigure(config, dependencies)
+        return tts
 
     @classmethod
-    def validate_config(cls, config: ComponentConfig) -> Sequence[str]:
-        return []
+    def validate_config(
+        cls, config: ComponentConfig
+    ) -> Tuple[Sequence[str], Sequence[str]]:
+        return [], []
 
     def reconfigure(
         self, config: ComponentConfig, dependencies: Mapping[ResourceName, ResourceBase]
@@ -50,14 +52,12 @@ class TtsPiper(SpeechService, Reconfigurable):
         attrs = struct_to_dict(config.attributes)
         LOGGER.debug(attrs)
         self.voice_model_name = str(attrs.get("voice_model_name", "en_US-amy-medium"))
-        voices_info = get_voices(self.data_dir, update_voices=True)
+        download_dir = Path(self.data_dir)
+        model_path = download_dir / f"{self.voice_model_name}.onnx"
+        model_config_path = download_dir / f"{self.voice_model_name}.onnx.json"
+        download_voice(self.voice_model_name, download_dir)
 
-        ensure_voice_exists(
-            self.voice_model_name, [self.data_dir], self.data_dir, voices_info
-        )
-        voice_model, voice_config = find_voice(self.voice_model_name, [self.data_dir])
-
-        self.voice = PiperVoice.load(voice_model, config_path=voice_config)
+        self.voice = PiperVoice.load(model_path, config_path=model_config_path)
 
     async def close(self):
         LOGGER.info(f"{self.name} is closed.")
@@ -95,11 +95,9 @@ class TtsPiper(SpeechService, Reconfigurable):
         wav_io = BytesIO()
         wav_file = wave.open(wav_io, "wb")
 
-        self.voice.synthesize(
+        self.voice.synthesize_wav(
             text,
             wav_file,
-            speaker_id=0,
-            sentence_silence=0.0,
         )
         return wav_io, wav_file
 

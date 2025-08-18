@@ -1,10 +1,1 @@
-from viam.resource.registry import Registry, ResourceCreatorRegistration
-
-from speech_service_api import SpeechService
-from .tts import TtsPiper
-
-Registry.register_resource_creator(
-    SpeechService.API,
-    TtsPiper.MODEL,
-    ResourceCreatorRegistration(TtsPiper.new, TtsPiper.validate_config),
-)
+from .tts import TtsPiper as TtsPiper

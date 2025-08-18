@@ -1,6 +1,6 @@
 [project]
 name = "tts-piper"
-version = "0.2.1"
+version = "0.3.0"
 description = "Add your description here"
 authors = [
     { name = "HipsterBrown", email = "headhipster@hipsterbrown.com" }
@@ -8,11 +8,11 @@ authors = [
 dependencies = [
     "viam-sdk>=0.40.0",
     "speech-service-api @ git+https://github.com/viam-labs/speech-service-api.git@v0.5.2",
-    "piper-tts @ git+https://github.com/hipsterbrown/piper@master#subdirectory=src/python_run",
+    "piper-tts",
     "pyaudio>=0.2.14"
 ]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.9,<3.10"
 license = { text = "Apache-2.0" }
 classifiers = ["Private :: Do Not Upload"]
 

@@ -50,7 +50,7 @@ The following attributes are available for the `viam-labs:speech:speechio` speec
 
 | Name    | Type   | Inclusion    | Description |
 | ------- | ------ | ------------ | ----------- |
-| `voice_model_name` | string | Optional |  The name of the pre-trained [Piper model](https://github.com/rhasspy/piper/blob/master/VOICES.md) to be used. Default: `"en_US-amy-medium"`.  |
+| `voice_model_name` | string | Optional |  The name of the pre-trained [Piper model](https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md) to be used. Default: `"en_US-amy-medium"`.  |
 
 [Preview the available models](https://rhasspy.github.io/piper-samples/)
 
@@ -59,7 +59,7 @@ The following attributes are available for the `viam-labs:speech:speechio` speec
 
 ## Contributing
 
-This project was bootstrapped and it managed by [`rye`](https://rye-up.com/). Follow the documentation for [installing rye](https://rye-up.com/guide/installation/) and then run the `sync` command in your local `git clone` of this project to get started:
+This project was bootstrapped and it managed by [`uv`](https://docs.astral.sh/uv/). Follow the documentation for [installing uv](https://docs.astral.sh/uv/getting-started/installation/) and then run the `make install` command in your local `git clone` of this project to get started:
 
 ```console
 git clone https://github.com/viam-labs/tts-piper && cd tts-piper
