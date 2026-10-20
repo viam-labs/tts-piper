@@ -8,7 +8,7 @@ upload:
 	viam module upload --version $(version) --platform linux/any module.tar.gz
 
 clean:
-	rm module.tar.gz && rm -rf dist/
+	rm -f module.tar.gz && rm -rf dist/
 
 .PHONY: build
 build:

@@ -31,7 +31,8 @@ if command -v brew; then
   brew install portaudio
 fi
 
-if ! uv venv --python 3.9 $VIRTUAL_ENV; then
+# Package requires-python is >=3.10 (viam-sdk); keep first_run in sync.
+if ! uv venv --python 3.10 $VIRTUAL_ENV; then
   echo "unable to create required virtual environment"
   exit 1
 fi
