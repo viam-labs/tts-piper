@@ -42,7 +42,17 @@ On the new component panel, copy and paste the following attribute template into
 }
 ```
 
-These are the default values for these fields, none are required to be set for this service.
+Optional per-machine overrides when a USB DAC rejects the voice's native rate:
+
+```json
+{
+  "voice_model_name": "en_US-amy-medium",
+  "sample_rate": 48000,
+  "device_index": 0
+}
+```
+
+None of these fields are required.
 
 ### Attributes
 
@@ -51,6 +61,8 @@ The following attributes are available for the `viam-labs:speech:speechio` speec
 | Name    | Type   | Inclusion    | Description |
 | ------- | ------ | ------------ | ----------- |
 | `voice_model_name` | string | Optional |  The name of the pre-trained [Piper model](https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md) to be used. Default: `"en_US-amy-medium"`.  |
+| `sample_rate` | int | Optional | Playback sample rate in Hz. When unset, uses the Piper voice's native rate (often `22050`). If the device rejects that rate (`OSError` `-9997`), playback automatically retries at `48000` with resampling. Set this to override per machine (for example `48000` on USB DACs). |
+| `device_index` | int | Optional | PyAudio output device index. When unset, uses the system default output device. |
 
 [Preview the available models](https://rhasspy.github.io/piper-samples/)
 

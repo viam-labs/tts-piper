@@ -3,9 +3,10 @@ from io import BytesIO
 from pathlib import Path
 import wave
 import os
-from typing import ClassVar, Tuple
+from typing import ClassVar, Optional, Tuple
 from typing_extensions import Self
 
+import numpy as np
 from viam.logging import getLogger
 from viam.proto.common import ResourceName
 from viam.resource.base import ResourceBase
@@ -21,6 +22,12 @@ import pyaudio
 
 LOGGER = getLogger(__name__)
 
+# PortAudio / PyAudio: device rejected the requested sample rate (common on USB DACs).
+PA_INVALID_SAMPLE_RATE = -9997
+FALLBACK_SAMPLE_RATE = 48000
+
+_SAMPLE_WIDTH_DTYPE = {1: np.int8, 2: np.int16, 4: np.int32}
+
 
 def _is_cuda_available() -> bool:
     """Check if CUDA is available for use with ONNX Runtime."""
@@ -32,10 +39,40 @@ def _is_cuda_available() -> bool:
         return False
 
 
+def _resample_pcm(
+    pcm: bytes, sample_width: int, channels: int, from_rate: int, to_rate: int
+) -> bytes:
+    if from_rate == to_rate:
+        return pcm
+    dtype = _SAMPLE_WIDTH_DTYPE.get(sample_width)
+    if dtype is None:
+        raise ValueError(f"Unsupported sample width for resampling: {sample_width}")
+
+    samples = np.frombuffer(pcm, dtype=dtype)
+    if channels > 1:
+        samples = samples.reshape(-1, channels)
+        n_in = samples.shape[0]
+        n_out = max(1, int(round(n_in * to_rate / from_rate)))
+        x_old = np.linspace(0.0, 1.0, n_in, endpoint=False)
+        x_new = np.linspace(0.0, 1.0, n_out, endpoint=False)
+        out = np.empty((n_out, channels), dtype=dtype)
+        for channel in range(channels):
+            out[:, channel] = np.interp(x_new, x_old, samples[:, channel]).astype(dtype)
+        return out.reshape(-1).tobytes()
+
+    n_in = len(samples)
+    n_out = max(1, int(round(n_in * to_rate / from_rate)))
+    x_old = np.linspace(0.0, 1.0, n_in, endpoint=False)
+    x_new = np.linspace(0.0, 1.0, n_out, endpoint=False)
+    return np.interp(x_new, x_old, samples).astype(dtype).tobytes()
+
+
 class TtsPiper(SpeechService, EasyResource):
     MODEL: ClassVar[Model] = Model(ModelFamily("viam-labs", "speech"), "tts-piper")
 
     voice_model_name: str = "en_US-amy-medium"
+    sample_rate: Optional[int] = None
+    device_index: Optional[int] = None
     data_dir: str = os.environ.get("VIAM_MODULE_DATA", str(Path.cwd()))
     _is_speaking = False
 
@@ -62,6 +99,10 @@ class TtsPiper(SpeechService, EasyResource):
         attrs = struct_to_dict(config.attributes)
         LOGGER.debug(attrs)
         self.voice_model_name = str(attrs.get("voice_model_name", "en_US-amy-medium"))
+        sample_rate = attrs.get("sample_rate")
+        self.sample_rate = int(sample_rate) if sample_rate is not None else None
+        device_index = attrs.get("device_index")
+        self.device_index = int(device_index) if device_index is not None else None
         download_dir = Path(self.data_dir)
         model_path = download_dir / f"{self.voice_model_name}.onnx"
         model_config_path = download_dir / f"{self.voice_model_name}.onnx.json"
@@ -82,22 +123,65 @@ class TtsPiper(SpeechService, EasyResource):
     async def is_speaking(self) -> bool:
         return self._is_speaking
 
+    def _open_playback_stream(
+        self,
+        p: pyaudio.PyAudio,
+        sample_width: int,
+        channels: int,
+        rate: int,
+    ) -> pyaudio.Stream:
+        open_kwargs = {
+            "format": p.get_format_from_width(sample_width),
+            "channels": channels,
+            "rate": rate,
+            "output": True,
+        }
+        if self.device_index is not None:
+            open_kwargs["output_device_index"] = self.device_index
+        return p.open(**open_kwargs)
+
     async def say(self, text: str, blocking: bool) -> str:
         wav_io, wav_file = self._synthesis(text)
         self._is_speaking = True
 
-        p = pyaudio.PyAudio()
-        stream = p.open(
-            format=p.get_format_from_width(wav_file.getsampwidth()),
-            channels=wav_file.getnchannels(),
-            rate=wav_file.getframerate(),
-            output=True,
-        )
-        stream.write(wav_io.getvalue())
+        sample_width = wav_file.getsampwidth()
+        channels = wav_file.getnchannels()
+        native_rate = wav_file.getframerate()
+        wav_file.close()
 
-        stream.close()
-        p.terminate()
-        self._is_speaking = False
+        wav_io.seek(0)
+        with wave.open(wav_io, "rb") as reader:
+            pcm = reader.readframes(reader.getnframes())
+
+        target_rate = self.sample_rate if self.sample_rate is not None else native_rate
+        playback_pcm = _resample_pcm(pcm, sample_width, channels, native_rate, target_rate)
+
+        p = pyaudio.PyAudio()
+        try:
+            try:
+                stream = self._open_playback_stream(p, sample_width, channels, target_rate)
+            except OSError as err:
+                if err.errno != PA_INVALID_SAMPLE_RATE or target_rate == FALLBACK_SAMPLE_RATE:
+                    raise
+                LOGGER.warning(
+                    "Sample rate %s rejected by audio device (errno %s); "
+                    "retrying at %s Hz with resampling",
+                    target_rate,
+                    err.errno,
+                    FALLBACK_SAMPLE_RATE,
+                )
+                playback_pcm = _resample_pcm(
+                    pcm, sample_width, channels, native_rate, FALLBACK_SAMPLE_RATE
+                )
+                stream = self._open_playback_stream(
+                    p, sample_width, channels, FALLBACK_SAMPLE_RATE
+                )
+
+            stream.write(playback_pcm)
+            stream.close()
+        finally:
+            p.terminate()
+            self._is_speaking = False
 
         return text
 
