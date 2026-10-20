@@ -32,7 +32,8 @@ if command -v brew; then
 fi
 
 # Package requires-python is >=3.10 (viam-sdk); keep first_run in sync.
-if ! uv venv --python 3.10 $VIRTUAL_ENV; then
+# --clear: newer uv refuses to replace an existing venv without it.
+if ! uv venv --clear --python 3.10 $VIRTUAL_ENV; then
   echo "unable to create required virtual environment"
   exit 1
 fi

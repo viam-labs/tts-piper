@@ -1,6 +1,6 @@
 [project]
 name = "tts-piper"
-version = "0.3.3"
+version = "0.3.4"
 description = "Add your description here"
 authors = [
     { name = "HipsterBrown", email = "headhipster@hipsterbrown.com" }
