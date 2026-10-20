@@ -42,27 +42,44 @@ On the new component panel, copy and paste the following attribute template into
 }
 ```
 
-Optional per-machine overrides when a USB DAC rejects the voice's native rate:
+Playback device selection (prefer earlier options):
 
 ```json
 {
   "voice_model_name": "en_US-amy-medium",
-  "sample_rate": 48000,
-  "device_index": 0
+  "audio_out": "bspeaker"
 }
 ```
 
-None of these fields are required.
+```json
+{
+  "voice_model_name": "en_US-amy-medium",
+  "device": "plughw:CARD=U0x19080x1331,DEV=0"
+}
+```
+
+```json
+{
+  "voice_model_name": "en_US-amy-medium",
+  "device_name": "USB Device 0x1908",
+  "sample_rate": 48000
+}
+```
+
+None of these fields are required. When unset, playback uses the system default PyAudio output device.
 
 ### Attributes
 
-The following attributes are available for the `viam-labs:speech:speechio` speech service:
+The following attributes are available for the `viam-labs:speech:tts-piper` speech service:
 
 | Name    | Type   | Inclusion    | Description |
 | ------- | ------ | ------------ | ----------- |
 | `voice_model_name` | string | Optional |  The name of the pre-trained [Piper model](https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md) to be used. Default: `"en_US-amy-medium"`.  |
-| `sample_rate` | int | Optional | Playback sample rate in Hz. When unset, uses the Piper voice's native rate (often `22050`). If the device rejects that rate (`OSError` `-9997`), playback automatically retries at `48000` with resampling. Set this to override per machine (for example `48000` on USB DACs). |
-| `device_index` | int | Optional | PyAudio output device index. When unset, uses the system default output device. |
+| `audio_out` | string | Optional | Name of an [`audio_out`](https://docs.viam.com/reference/apis/components/audio-out/) component (for example `viam:system-audio:speaker`) to play through. When set, this service synthesizes audio and hands it off; device selection and rate conversion live on that component. Declared as a required dependency. |
+| `device` | string | Optional | ALSA PCM string for local playback via `aplay` (for example `"plughw:CARD=U0x19080x1331,DEV=0"`). Prefer `plughw`/`plug` so ALSA handles rate conversion. Ignored when `audio_out` is set. |
+| `device_name` | string | Optional | Case-insensitive substring matched against PyAudio output device names at playback time (for example `"USB Device 0x1908"`). Stable across USB re-enumeration; falls back to the default device with a log line if nothing matches. Ignored when `audio_out` or `device` is set. |
+| `sample_rate` | int | Optional | Playback sample rate in Hz for local playback. When unset, uses the Piper voice's native rate (often `22050`). On the PyAudio path, if the device rejects that rate (`OSError` `-9997`), playback retries at `48000` with resampling. |
+| `device_index` | int | Optional | **Deprecated.** Numeric PyAudio output device index. Unstable across reboots and USB re-enumeration; prefer `audio_out`, `device`, or `device_name`. |
 
 [Preview the available models](https://rhasspy.github.io/piper-samples/)
 
