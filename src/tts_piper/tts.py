@@ -1,27 +1,26 @@
+import asyncio
+import os
+import wave
 from collections.abc import Mapping, Sequence
 from io import BytesIO
 from pathlib import Path
-import asyncio
-import wave
-import os
 from typing import ClassVar, List, Optional, Tuple, cast
-from typing_extensions import Self
 
 import numpy as np
+import pyaudio
+from piper import PiperVoice
+from piper.download_voices import download_voice
+from speech_service_api import SpeechService
+from typing_extensions import Self
 from viam.components.audio_out import AudioOut
 from viam.logging import getLogger
 from viam.media.audio import AudioCodec
+from viam.proto.app.robot import ComponentConfig
 from viam.proto.common import AudioInfo, ResourceName
 from viam.resource.base import ResourceBase
 from viam.resource.easy_resource import EasyResource
-from viam.proto.app.robot import ComponentConfig
 from viam.resource.types import Model, ModelFamily
 from viam.utils import struct_to_dict
-
-from speech_service_api import SpeechService
-from piper import PiperVoice
-from piper.download_voices import download_voice
-import pyaudio
 
 LOGGER = getLogger(__name__)
 

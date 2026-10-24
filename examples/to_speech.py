@@ -1,10 +1,9 @@
 import asyncio
 import wave
 
-from viam.robot.client import RobotClient
-from viam.logging import getLogger
-
 from speech_service_api import SpeechService
+from viam.logging import getLogger
+from viam.robot.client import RobotClient
 
 LOGGER = getLogger(__name__)
 
