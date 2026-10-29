@@ -1,27 +1,26 @@
+import asyncio
+import os
+import wave
 from collections.abc import Mapping, Sequence
 from io import BytesIO
 from pathlib import Path
-import asyncio
-import wave
-import os
 from typing import ClassVar, List, Optional, Tuple, cast
-from typing_extensions import Self
 
 import numpy as np
+import pyaudio
+from piper import PiperVoice
+from piper.download_voices import download_voice
+from speech_service_api import SpeechService
+from typing_extensions import Self
 from viam.components.audio_out import AudioOut
 from viam.logging import getLogger
 from viam.media.audio import AudioCodec
+from viam.proto.app.robot import ComponentConfig
 from viam.proto.common import AudioInfo, ResourceName
 from viam.resource.base import ResourceBase
 from viam.resource.easy_resource import EasyResource
-from viam.proto.app.robot import ComponentConfig
 from viam.resource.types import Model, ModelFamily
 from viam.utils import struct_to_dict
-
-from speech_service_api import SpeechService
-from piper import PiperVoice
-from piper.download_voices import download_voice
-import pyaudio
 
 LOGGER = getLogger(__name__)
 
@@ -37,8 +36,9 @@ def _is_cuda_available() -> bool:
     """Check if CUDA is available for use with ONNX Runtime."""
     try:
         import onnxruntime as ort
+
         providers = ort.get_available_providers()
-        return 'CUDAExecutionProvider' in providers
+        return "CUDAExecutionProvider" in providers
     except ImportError:
         return False
 
@@ -89,7 +89,10 @@ def _resolve_device_name(p: pyaudio.PyAudio, device_name: str) -> Optional[int]:
         if needle in name.lower()
     ]
     if not matches:
-        available = ", ".join(f"[{i}] {name}" for i, name in _list_output_devices(p)) or "(none)"
+        available = (
+            ", ".join(f"[{i}] {name}" for i, name in _list_output_devices(p))
+            or "(none)"
+        )
         LOGGER.warning(
             "No PyAudio output device matched device_name %r; falling back to default. "
             "Available outputs: %s",
@@ -177,7 +180,9 @@ class TtsPiper(SpeechService, EasyResource):
                 AudioOut,
                 dependencies[AudioOut.get_resource_name(self.audio_out_name)],
             )
-            LOGGER.info("Playback delegated to audio_out dependency %r", self.audio_out_name)
+            LOGGER.info(
+                "Playback delegated to audio_out dependency %r", self.audio_out_name
+            )
 
         download_dir = Path(self.data_dir)
         model_path = download_dir / f"{self.voice_model_name}.onnx"
@@ -191,7 +196,9 @@ class TtsPiper(SpeechService, EasyResource):
         else:
             LOGGER.debug("CUDA not available, using CPU for Piper TTS")
 
-        self.voice = PiperVoice.load(model_path, config_path=model_config_path, use_cuda=use_cuda)
+        self.voice = PiperVoice.load(
+            model_path, config_path=model_config_path, use_cuda=use_cuda
+        )
 
     async def close(self):
         LOGGER.info(f"{self.name} is closed.")
@@ -247,7 +254,9 @@ class TtsPiper(SpeechService, EasyResource):
         assert self.device is not None
         aplay_format = _APLAY_FORMAT.get(sample_width)
         if aplay_format is None:
-            raise ValueError(f"Unsupported sample width for ALSA playback: {sample_width}")
+            raise ValueError(
+                f"Unsupported sample width for ALSA playback: {sample_width}"
+            )
 
         # plughw:/plug: provide rate conversion; pass native (or configured) rate as-is.
         proc = await asyncio.create_subprocess_exec(
@@ -276,7 +285,9 @@ class TtsPiper(SpeechService, EasyResource):
         self, pcm: bytes, sample_width: int, channels: int, native_rate: int
     ) -> None:
         target_rate = self.sample_rate if self.sample_rate is not None else native_rate
-        playback_pcm = _resample_pcm(pcm, sample_width, channels, native_rate, target_rate)
+        playback_pcm = _resample_pcm(
+            pcm, sample_width, channels, native_rate, target_rate
+        )
 
         p = pyaudio.PyAudio()
         try:
@@ -286,7 +297,10 @@ class TtsPiper(SpeechService, EasyResource):
                     p, sample_width, channels, target_rate, output_device_index
                 )
             except OSError as err:
-                if err.errno != PA_INVALID_SAMPLE_RATE or target_rate == FALLBACK_SAMPLE_RATE:
+                if (
+                    err.errno != PA_INVALID_SAMPLE_RATE
+                    or target_rate == FALLBACK_SAMPLE_RATE
+                ):
                     raise
                 LOGGER.warning(
                     "Sample rate %s rejected by audio device (errno %s); "
@@ -322,13 +336,17 @@ class TtsPiper(SpeechService, EasyResource):
 
         play_rate = self.sample_rate if self.sample_rate is not None else native_rate
         if self.sample_rate is not None and self.sample_rate != native_rate:
-            play_pcm = _resample_pcm(pcm, sample_width, channels, native_rate, play_rate)
+            play_pcm = _resample_pcm(
+                pcm, sample_width, channels, native_rate, play_rate
+            )
         else:
             play_pcm = pcm
 
         try:
             if self.audio_out is not None:
-                await self._play_via_audio_out(play_pcm, sample_width, channels, play_rate)
+                await self._play_via_audio_out(
+                    play_pcm, sample_width, channels, play_rate
+                )
             elif self.device:
                 # ALSA plug devices resample; prefer native rate unless sample_rate is set.
                 await self._play_via_alsa(play_pcm, sample_width, channels, play_rate)
