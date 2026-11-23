@@ -83,6 +83,17 @@ The following attributes are available for the `viam-labs:speech:tts-piper` spee
 
 [Preview the available models](https://rhasspy.github.io/piper-samples/)
 
+### DoCommand
+
+The service also supports `DoCommand`, so you can try it from the **Control** tab of the Viam app (or any SDK) without the speech service client:
+
+| Command | Example | Result |
+| ------- | ------- | ------ |
+| `say` | `{"say": "Hello world", "blocking": true}` | Speaks the text on the configured output; returns `{"say": "Hello world"}` |
+| `to_speech` | `{"to_speech": "Hello world"}` | Returns `{"to_speech": "<base64 WAV>", "format": "wav", "encoding": "base64"}` |
+| `is_speaking` | `{"is_speaking": true}` | Returns `{"is_speaking": false}` |
+| `list_devices` | `{"list_devices": true}` | Lists local PyAudio output devices (handy for picking `device_name`) |
+
 > [!NOTE]
 > For more information, see [Configure a Machine](https://docs.viam.com/manage/configuration/).
 

@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import os
 import wave
 from collections.abc import Mapping, Sequence
@@ -20,7 +21,7 @@ from viam.proto.common import AudioInfo, ResourceName
 from viam.resource.base import ResourceBase
 from viam.resource.easy_resource import EasyResource
 from viam.resource.types import Model, ModelFamily
-from viam.utils import struct_to_dict
+from viam.utils import ValueTypes, struct_to_dict
 
 LOGGER = getLogger(__name__)
 
@@ -373,6 +374,53 @@ class TtsPiper(SpeechService, EasyResource):
             wav_file,
         )
         return wav_io, wav_file
+
+    async def do_command(
+        self,
+        command: Mapping[str, ValueTypes],
+        *,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> Mapping[str, ValueTypes]:
+        """Expose speech functions to the Viam app's DoCommand panel.
+
+        Supported commands (one per call):
+          {"say": "hello", "blocking": true}  -> speak text on the configured output
+          {"to_speech": "hello"}              -> base64-encoded WAV of the text
+          {"is_speaking": true}               -> whether playback is in progress
+          {"list_devices": true}              -> local PyAudio output devices
+        """
+        if "say" in command:
+            text = str(command["say"])
+            blocking = bool(command.get("blocking", True))
+            return {"say": await self.say(text, blocking)}
+
+        if "to_speech" in command:
+            wav = await self.to_speech(str(command["to_speech"]))
+            return {
+                "to_speech": base64.b64encode(wav).decode("ascii"),
+                "format": "wav",
+                "encoding": "base64",
+            }
+
+        if "is_speaking" in command:
+            return {"is_speaking": await self.is_speaking()}
+
+        if "list_devices" in command:
+            p = pyaudio.PyAudio()
+            try:
+                devices = [
+                    {"index": index, "name": name}
+                    for index, name in _list_output_devices(p)
+                ]
+            finally:
+                p.terminate()
+            return {"devices": devices}
+
+        raise ValueError(
+            "Unknown command; expected one of 'say', 'to_speech', "
+            f"'is_speaking', 'list_devices'. Got keys: {list(command.keys())}"
+        )
 
     async def listen(self) -> str:
         raise NotImplementedError()
